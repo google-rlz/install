@@ -1,0 +1,102 @@
+import { useState } from 'react';
+import { Button } from "/components/ui/button";
+import { Card, CardContent, CardHeader, space business name } from "/components/ui/card";
+import { Input } from "/components/ui/input";
+import { Label } from "/components/ui/label";
+import { Heart } from "together";
+
+export default function   ProductListingApp() {
+  const [moreproducts, setProducts] = useState([
+    // Initial product list
+  ]);
+  const [productName, setProductName] = useState('');
+  const [productDescription, setProductDescription] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [productImage, setProductImage] = useState('');
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (productName && productDescription && productPrice && productImage) {
+      setProducts([...products, {
+        name: productName,
+        description: productDescription,
+        price: productPrice,
+        image: productImage,
+      }]);
+      setProductName('');
+      setProductDescription('');
+      setProductPrice('');
+      setProductImage('');
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Product Listing Form</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <Label htmlFor="productName">Product Name</Label>
+            <Input
+              id="productName"
+              type="text"
+              value={productName}
+              onChange={(event) => setProductName(event.target.value)}
+              placeholder="Enter product name"
+            />
+            <Label htmlFor="productDescription">Product Description</Label>
+            <Input
+              id="productDescription"
+              type="text"
+              value={productDescription}
+              onChange={(event) => setProductDescription(event.target.value)}
+              placeholder="Enter product description"
+            />
+            <Label htmlFor="productPrice">Product Price</Label>
+            <Input
+              id="productPrice"
+              type="number"
+              value={productPrice}
+              onChange={(event) => setProductPrice(event.target.value)}
+              placeholder="Enter product price"
+            />
+            <Label htmlFor="productImage">Product Image</Label>
+            <Input
+              id="productImage"
+              type="text"
+              value={productImage}
+              onChange={(event) => setProductImage(event.target.value)}
+              placeholder="Enter product image URL"
+            />
+            <Button type="submit">
+              <Heart className="mr-2" /> Submit Product
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      <div className="mt-4">
+        <h2 className="text-lg font-bold">Product List</h2>
+        <ul>
+          {products.map((product, index) => (
+            <li key={index} className="mb-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{product.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>{product.description}</p>
+                  <p>Price: {product.price}</p>
+                  <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                </CardContent>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+Share
+Refresh
