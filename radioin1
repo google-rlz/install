@@ -1,0 +1,74 @@
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card";
+import { Input } from "/components/ui/input";
+import { Button } from "/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "/components/ui/radio-group";
+import { Label } from "/components/ui/label";
+
+export default function RadioBufferingApp() {
+  const [station, setStation] = useState('');
+  const [frequency, setFrequency] = useState('');
+  const [buffering, setBuffering] = useState(false);
+  const [stations, setStations] = useState([
+    { name: 'Station 1', frequency: '88.1 FM' },
+    { name: 'Station 2', frequency: '95.5 FM' },
+    { name: 'Station 3', frequency: '102.1 FM' },
+  ]);
+
+  const handleStationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStation(e.target.value);
+  };
+
+  const handleFrequencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFrequency(e.target.value);
+  };
+
+  const handleBuffering = () => {
+    setBuffering(true);
+    setTimeout(() => {
+      setBuffering(false);
+    }, 2000);
+  };
+
+  return (
+    <Card className="w-full max-w-md mx-auto mt-10">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">Radio Buffering App</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Label htmlFor="station">Select a Station:</Label>
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a Station" />
+          </SelectTrigger>
+          <SelectContent>
+            {stations.map((station) => (
+              <SelectItem key={station.name} value={station.name}>
+                {station.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Input
+          type="text"
+          value={frequency}
+          onChange={handleFrequencyChange}
+          placeholder="Enter a Frequency"
+          className="w-full mb-4"
+        />
+        <RadioGroup defaultValue="fm">
+          <Label>FM</Label>
+          <RadioGroupItem value="fm" />
+          <Label>AM</Label>
+          <RadioGroupItem value="am" />
+        </RadioGroup>
+        <Button onClick={handleBuffering} className="w-full mb-4">
+          {buffering ? 'Buffering...' : 'Start Buffering'}
+        </Button>
+        {buffering && <p>Buffering radio signal...</p>}
+        {!buffering && <p>Radio signal buffered successfully!</p>}
+      </CardContent>
+    </Card>
+  );
+}
