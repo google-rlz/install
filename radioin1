@@ -72,3 +72,48 @@ export default function RadioBufferingApp() {
     </Card>
   );
 }
+import { useState } from 'react';
+import { Input } from "/components/ui/input";
+import { Button } from "/components/ui/button";
+import { Label } from "/components/ui/label";
+
+export default function GitHubIDForm() {
+  const [githubId, setGitHubId] = useState('');
+  const [error, setError] = useState(null);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!githubId) {
+      setError('GitHub ID is required');
+    } else {
+      // Submit the form data
+      console.log('Form submitted:', githubId);
+      setError(null);
+    }
+  };
+
+  const handleInputChange = (event) => {
+    setGitHubId(event.target.value);
+    if (error) {
+      setError(null);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-10">
+      <Label htmlFor="github-id">GitHub ID</Label>
+      <Input
+        id="github-id"
+        type="text"
+        value={githubId}
+        onChange={handleInputChange}
+        placeholder="Enter your GitHub ID"
+        className="w-full"
+      />
+      {error && (
+        <p className="text-red-500 text-sm mt-2">{error}</p>
+      )}
+      <Button type="submit" className="w-full mt-4">
+        Submit
+      </Button>
+    </form
