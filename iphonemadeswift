@@ -254,3 +254,171 @@ func test(p: any P) {
 func mapNumbers(_ c: any Collection<Int>) -> [Int] {
   c.map { $0 }
 }
+// Module: _Distributed
+
+protocol DistributedActorSystem: Sendable {
+  /// The type of `ID` assigned to a distributed actor while initializing with this actor system.
+  /// The identity should be meaningfully unique, in the sense that ID equality should mean referring to the
+  /// same distributed actor.
+  ///
+  /// A distributed actor created using a specific actor system will use the system's `ActorID` as
+  /// the `ID` type it stores and for its `Hashable` implementation.
+  ///
+  /// ### Implicit distribute actor `Codable` conformance
+  /// If the `ActorID` (and therefore also the `DistributedActor.ID`) conforms to `Codable`,
+  /// the `distributed actor` will gain an automatically synthesized conformance to `Codable` as well.
+  associatedtype ActorID: Sendable & Hashable
+
+  /// The specific type of the invocation encoder that will be created and populated
+  /// with details about the invocation when a remote call is about to be made.
+  ///
+  /// The populated instance will be passed to the `remoteCall` from where it can be
+  /// used to serialize into a message format in order to perform the remote invocation.
+  associatedtype InvocationEncoder: DistributedTargetInvocationEncoder
+
+  /// The specific type of invocation decoder used by this actor system.
+  ///
+  /// An instance of this type must be passed to `executeDistributedTarget` which
+  /// extracts arguments and applies them to the local target of the invocation.
+  associatedtype InvocationDecoder: DistributedTargetInvocationDecoder
+
+  /// The serialization requirement that will be applied to all distributed targets used with this system.
+  ///
+  /// An actor system is still allowed to throw serialization errors if a specific value passed to a distributed
+  /// func violates some other restrictions that can only be checked at runtime, e.g. checking specific types
+  /// against an "allow-list" or similar. The primary purpose of the serialization requirement is to provide
+  /// compile time hints to developers, that they must carefully consider evolution and serialization of
+  /// values passed to and from distributed methods and computed properties.
+  associatedtype SerializationRequirement
+    where SerializationRequirement == InvocationEncoder.SerializationRequirement,
+          SerializationRequirement == InvocationDecoder.SerializationRequirement
+
+  // ==== ---------------------------------------------------------------------
+  // - MARK: Actor Lifecycle
+
+  /// Called by a distributed when it begins its initialization (in a non-delegating init).
+  ///
+  /// The system should take special care to not assign two actors the same `ID`, and the `ID`
+  /// must remain valid until it is resigned (see `resignID(_:)`).
+  func assignID<Actor>(_ actorType: Actor.Type) -> ActorID
+      where Actor: DistributedActor,
+            Actor.ID == ActorID
+
+  /// Automatically called by in every distributed actor's non-delegating initializer.
+  ///
+  /// The call is made specifically before the `self` of such distributed actor is about to
+  /// escape, e.g. via a function call, closure or otherwise. If no such event occurs the
+  /// call is made at the end of the initializer.
+  ///
+  /// The passed `actor` is the `self` of the initialized actor, and its `actor.id` is expected
+  /// to be of the same value that was assigned to it in `assignID`.
+  ///
+  /// After the ready call returns, it must be possible to resolve it using the 'resolve(_:as:)'
+  /// method on the system.
+  func actorReady<Actor>(_ actor: Actor)
+      where Actor: DistributedActor,
+            Actor.ID == ActorID
+
+  /// Called when the distributed actor is deinitialized (or has failed to finish initializing).
+  ///
+  /// The system may release any resources associated with this actor id, and should not make
+  /// further attempts to deliver messages to the actor identified by this identity.
+  func resignID(_ id: ActorID)
+
+  // ==== ---------------------------------------------------------------------
+  // - MARK: Resolving distributed actors
+
+  /// Resolve a local or remote actor address to a real actor instance, or throw if unable to.
+  /// The returned value is either a local actor or proxy to a remote actor.
+  ///
+  /// Resolving an actor is called when a specific distributed actors `init(from:)`
+  /// decoding initializer is invoked. Once the actor's identity is deserialized
+  /// using the `decodeID(from:)` call, it is fed into this function, which
+  /// is responsible for resolving the identity to a remote or local actor reference.
+  ///
+  /// If the resolve fails, meaning that it cannot locate a local actor managed for
+  /// this identity, managed by this transport, nor can a remote actor reference
+  /// be created for this identity on this transport, then this function must throw.
+  ///
+  /// If this function returns correctly, the returned actor reference is immediately
+  /// usable. It may not necessarily imply the strict *existence* of a remote actor
+  /// the identity was pointing towards, e.g. when a remote system allocates actors
+  /// lazily as they are first time messaged to, however this should not be a concern
+  /// of the sending side.
+  ///
+  /// Detecting liveness of such remote actors shall be offered / by transport libraries
+  /// by other means, such as "watching an actor for termination" or similar.
+  func resolve<Actor>(_ id: ActorID, as actorType: Actor.Type) throws -> Actor?
+      where Actor: DistributedActor,
+            Actor.ID: ActorID,
+            Actor.SerializationRequirement == Self.SerializationRequirement
+
+  // ==== ---------------------------------------------------------------------
+  // - MARK: Remote Target Invocations
+
+  /// Invoked by the Swift runtime when a distributed remote call is about to be made.
+  ///
+  /// The returned `InvocationEncoder` will be populated with all
+  /// generic substitutions, arguments, and specific error and return types
+  /// that are associated with this specific invocation.
+  func makeInvocationEncoder() -> InvocationEncoder
+
+  // We'll discuss the remoteCall method in detail in this proposal.
+  // It cannot be declared as protocol requirement, and remains an ad-hoc
+  // requirement like this:
+  /// Invoked by the Swift runtime when making a remote call.
+  ///
+  /// The `invocation` is the arguments container that was previously created
+  /// by `makeInvocationEncoder` and has been populated with all arguments.
+  ///
+  /// This method should perform the actual remote function call, and await for its response.
+  ///
+  /// ## Errors
+  /// This method is allowed to throw because of underlying transport or serialization errors,
+  /// as well as by re-throwing the error received from the remote callee (if able to).
+  ///
+  /// Ad-hoc protocol requirement.
+  func remoteCall<Actor, Failure, Success>(
+      on actor: Actor,
+      target: RemoteCallTarget,
+      invocation: inout InvocationEncoder,
+      throwing: Failure.Type,
+      returning: Success.Type
+  ) async throws -> Success
+      where Actor: DistributedActor,
+            Actor.ID == ActorID,
+            Failure: Error,
+            Success: Self.SerializationRequirement
+
+  /// Invoked by the Swift runtime when making a remote call to a `Void` returning function.
+  ///
+  /// ( ... Same as `remoteCall` ... )
+  ///
+  /// Ad-hoc protocol requirement.
+  func remoteCallVoid<Actor, Error>(
+      on actor: Actor,
+      target: RemoteCallTarget,
+      invocation: inout InvocationEncoder,
+      throwing: Failure.Type
+  ) async throws
+      where Actor: DistributedActor,
+            Actor.ID == ActorID,
+            Failure: Error
+}
+
+/// A distributed 'target' can be a `distributed func` or `distributed` computed property.
+///
+/// The actor system should encode the identifier however it sees fit,
+/// and transmit it to the remote peer in order to invoke identify the target of an invocation.
+public struct RemoteCallTarget: Hashable {
+  /// The mangled name of the invoked distributed method.
+  ///
+  /// It contains all information necessary to lookup the method using `executeDistributedActorMethod(...)`
+  var mangledName: String { ... }
+
+  /// The human-readable "full name" of the invoked method, e.g. 'Greeter.hello(name:)'.
+  var fullName: String { ... }
+}
+
+
+
