@@ -1,0 +1,141 @@
+
+import { useState } from 'react'
+import { Button } from "/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
+import { Input } from "/components/ui/input"
+export default function MotherLaptop() {
+ const [command, setCommand] = useState('')
+ const [responses, setResponses] = useState<string[]>([])
+ const handleCommand = () => {
+ let response = ''
+ switch (command.toLowerCase()) {
+ case 'open browser':
+ response = 'Opening browser...'
+ break
+ case 'show weather':
+ response = 'The weather is sunny with a high of 75°F.'
+ break
+ case 'play music':
+ response = 'Playing music...'
+ break
+ case 'send email':
+ response = 'Opening email client...'
+ break
+ default:
+ response = 'Command not recognized.'
+ }
+ setResponses([...responses, `You: ${command}`, `Mother Laptop: ${response}`]
+
+ setCommand('')
+ }
+ const clearInput = () => {
+ setCommand('')
+ }
+ return (
+ <Card className="w-full max-w-2xl mx-auto mt-10">
+ <CardHeader>
+ <CardTitle className="text-2xl font-bold">Mother Laptop</CardTitle>
+ </CardHeader>
+ <CardContent className="space-y-4">
+ <div className="h-64 overflow-y-auto bg-gray-100 p-4 rounded">
+ {responses.map((response, index) => (
+ <div key={index} className="mb-2">
+ {response}
+ </div>
+ ))}
+ </div>
+ <div className="flex space-x-2">
+ <Input
+ value={command}
+ onChange={(e) => setCommand(e.target.value)}
+ placeholder="Type a command..."
+ className="flex-1"
+ />
+ <Button onClick={handleCommand}>Send</Button
+ <Button variant="outline" onClick={clearInput}>Clear</Button>
+ </div>
+ </CardContent>
+ </Card>
+ )
+}
+Share
+Refresh
+import { useState } from 'react'
+import { Button } from "/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
+import { Input } from "/components/ui/input"
+import { Label } from "/components/ui/label"
+import { useToast } from "/components/ui/use-toast"
+const commands = {
+ "open browser": () => window.open("https://www.google.com"),
+ "play music": () => alert("Playing music"),
+ "stop music": () => alert("Stopping music"),
+ "shutdown": () => alert("Shutting down"),
+}
+export default function VoiceCommandApp() {
+ const [status, setStatus] = useState<string>("Waiting for command...")
+ const [commandText, setCommandText] = useState<string>("")
+ const { toast } = useToast()
+ const recognition = new (window as any).webkitSpeechRecognition(
+ recognition.continuous = false
+ recognition.interimResults = false
+ recognition.lang = "en-US"
+ const startListening = () => {
+ setStatus("Listening...")
+ recognition.start()
+ }
+ recognition.onresult = (event: any) => {
+ const transcript = event.results[0][0].transcript.trim().toLowerCase()
+ setCommandText(transcript)
+ setStatus(`Recognized: ${transcript}`)
+ if (commands[transcript]) {
+ commands[transcript]()
+ toast({
+ title: "Command Executed",
+ description: `Successfully executed: ${transcript}`,
+ })
+ } else {
+ toast({
+ title: "Command Not Found",
+ description: `No action for: ${transcript}`,
+ variant: "destructive",
+ })
+ }
+  recognition.onerror = (event: any) => {
+ setStatus(`Error: ${event.error}`)
+ }
+ recognition.onend = () => {
+ setStatus("Waiting for command...")
+ }
+ return (
+ <Card className="w-full max-w-md mx-auto mt-10">
+ <CardHeader>
+ <CardTitle className="text-2xl font-bold">Voice Command App</CardTitle>
+ </CardHeader>
+ <CardContent>
+ <div className="mb-4">
+ <Label htmlFor="command">Command:</Label>
+ <Input
+ id="command"
+ value={commandText}
+ readOnly
+ className="mt-2"
+ />
+ </div>
+ <div className="mb-4">
+ <Label>Status:</Label>
+ <Input
+ id="status
+ value={status}
+ readOnly
+ className="mt-2"
+ />
+ </div>
+ <Button onClick={startListening} className="w-full">
+ Start Listening
+ </Button>
+ </CardContent>
+ </Card>
+ )
+}
+Share
