@@ -1,0 +1,53 @@
+a#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <netdb.h>
+#endif
+namespace cross_platform_networking {
+#ifdef _WIN32
+typedef SOCKET socket_t;
+const int INVALID_SOCKET_VALUE = INVALID_SOCKET;
+#else
+typedef int socket_t;
+const int INVALID_SOCKET_VALUE = -1;
+#endif
+bool initialize() {
+#ifdef _WIN32
+WSADATA wsaData;
+return WSAStartup(MAKEWORD(2, 2), &wsaData) == 0;
+#els
+return true;
+#endif
+}
+void cleanup() {
+#ifdef _WIN32
+WSACleanup();
+#endif
+}
+socket_t create_socket(int domain, int type, int protocol) {
+return socket(domain, type, protocol);
+}
+int close_socket(socket_t sock) {
+#ifdef _WIN32
+return closesocket(sock);
+#else
+return close(sock);
+#endif
+}
+int connect_socket(socket_t sock, const struct sockaddr *addr, socklen_t addrlen) {
+return connect(sock, addr, addrlen);
+}
+int send_data(socket_t sock, const void *buffer, size_t length, int flags) {
+return send(sock, (const char *)buffer, length, flags)
+}
+int receive_data(socket_t sock, void *buffer, size_t length, int flags) {
+return recv(sock, (char *)buffer, length, flags);
+}
+} // namespace cross_platform_networkin
