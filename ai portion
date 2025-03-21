@@ -1,0 +1,46 @@
+} // namespace cross_platform_networking
+#include <iostream>
+namespace cross_platform_networking {
+void example_usage() {
+if (!initialize()) {
+std::cerr << "Failed to initialize network library" << std::endl;
+return;
+}
+socket_t sock = create_socket(AF_INET, SOCK_STREAM, 0);
+if (sock == INVALID_SOCKET_VALUE) {
+std::cerr << "Failed to create socket" << std::endl;
+cleanup();
+return;
+}
+struct sockaddr_in server_addr;
+server_addr.sin_family = AF_INET;
+server_addr.sin_port = htons(8080);
+inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
+if (connect_socket(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+std::cerr << "Failed to connect to server" << std::endl;
+close_socket(sock);
+cleanup();
+return
+}
+const char *message = "Hello, Server!";
+if (send_data(sock, message, strlen(message), 0) < 0) {
+std::cerr << "Failed to send data" << std::endl;
+close_socket(sock);
+cleanup();
+return;
+}
+char buffer[1024];
+int bytes_received = receive_data(sock, buffer, sizeof(buffer), 0);
+if (bytes_received < 0) {
+std::cerr << "Failed to receive data" << std::endl;
+} else {
+std::cout << "Received: " << std::string(buffer, bytes_received) << std::endl;
+}
+close_socket(sock);
+cleanup();
+}
+} // namespace cross_platform_networking
+int main() {
+cross_platform_networking::example_usage();
+return 0;
+
