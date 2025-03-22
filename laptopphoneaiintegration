@@ -1,0 +1,732 @@
+1. mkdir song-communication
+2. cd song-communication
+3. npm init -y
+4. npm install aubio
+5. npm install webpack webpack-cli ts-loader html-webpack-plugin --save-dev
+6. npm install typescript @types/three --save-dev
+7. {
+8. "compilerOptions": {
+9. "outDir": "./dist/",
+10. "noImplicitAny": true,
+11. "module": "es6",
+12. "target": "es5",
+13. "allowJs": true,
+14. "moduleResolution": "node",
+15. "sourceMap": true,
+16. "esModuleInterop": true
+17. },
+18. "include": ["src/**/*"]
+19. }
+20.
+21. Create a webpack.config.js File:
+22. const path = require('path');
+23. const HtmlWebpackPlugin = require('html-webpack-plugin');
+24.
+25. module.exports = {
+26. entry: './src/main.ts',
+27. module: {
+28. rules: 
+29. {
+30. test: /\.tsx?$/,
+31. use: 'ts-loader',
+32. exclude: /node_modules/,
+33. },
+34. ],
+35. },
+36. resolve: {
+37. extensions: ['.tsx', '.ts', '.js'],
+38. },
+39. output: {
+40. filename: 'bundle.js',
+41. path: path.resolve(__dirname, 'dist'),
+42. },
+43. plugins: [
+44. new HtmlWebpackPlugin({
+45. template: './src/index.html',
+46. }),
+47. ],
+48. devServer: {
+49. contentBase: path.join(__dirname, 'dist'),
+50. compress: true,
+51. port: 9000,
+52. },
+53. };
+54. Step 2: Create the HTML and TypeScript Files
+55. Create an index.html File:
+56. <!DOCTYPE html
+57. <html lang="en">
+58. <head>
+59. <meta charset="UTF-8">
+60. <meta name="viewport" content="width=device-width, initial-scale=1.0">
+61. <title>Song Communication</title>
+62. <style>
+63. body { margin: 0; display: flex; justify-content: center; align-items: center; height: 
+100vh; background-color: #f0f0f0; }
+64. audio { margin-bottom: 20px; }
+65. #status { font-size: 20px; }
+66. </style>
+67. </head>
+68. <body>
+69. <div>
+70. <audio id="audioPlayer" controls>
+71. <source src="path/to/your/song.mp3" type="audio/mpeg">
+72. Your browser does not support the audio element.
+73. </audio>
+74. <div id="status">Waiting for audio to play...</div>
+75. </div>
+76. <script src="bundle.js"></script>
+77. </body>
+78. </html>
+79. Create a main.ts File:
+80. import * as aubio from 'aubio';
+81.
+82. // Get audio element and status div
+83. const audioPlayer = document.getElementById('audioPlayer') as HTMLAudioElement
+84. const statusDiv = document.getElementById('status') as HTMLDivElement;
+85.
+86. // Create an audio context
+87. const audioContext = new AudioContext();
+88.
+89. // Function to handle audio processing
+90. function handleAudioProcessing(event: AudioProcessingEvent) {
+91. const inputData = event.inputBuffer.getChannelData(0);
+92. const buffer = aubio.Buffer(inputData);
+93.
+94. // Example: Detect onset (start of a new note or sound)
+95. const onset = new aubio.Onset('default', 1024, 512, audioContext.sampleRate);
+96. const isOnset = onset.do(buffer);
+97.
+98. if (isOnset) {
+99. statusDiv.textContent = 'Onset detected!';
+100. // Trigger actions here
+101. } else {
+102. statusDiv.textContent = 'Waiting for onset...';
+103. }
+104. }
+105.
+106. // Function to start audio processing
+107. async function startAudioProcessing() {
+108. const source = audioContext.createMediaElementSource(audioPlayer);
+109. const processor = audioContext.createScriptProcessor(1024, 1, 1);
+110.
+111. source.connect(processor)
+112. processor.connect(audioContext.destination);
+113.
+114. processor.onaudioprocess = handleAudioProcessing;
+115. }
+116.
+117. // Start audio processing when the audio starts playing
+118. audioPlayer.addEventListener('play', startAudioProcessing);
+119. Step 3: Run the Application
+120. Add a Build Script to package.json:
+121. {
+122. "name": "song-communication",
+123. "version": "1.0.0",
+124. "description": "",
+125. "main": "index.js",
+126. "scripts": {
+127. "build": "webpack",
+128. "start": "webpack serve --open"
+129. },
+130. "keywords": [],
+131. "author": "",
+132. "license": "ISC",
+133. "devDependencies": {
+134. "@types/three": "^0.146.0",
+135. "aubio": "^0.4.6",
+136. "html-webpack-plugin": "^5.5.0",
+137. "ts-loader": "^9.2.6",
+138. "typescript": "^4.5.5",
+139. "webpack": "^5.65.0"
+140. "webpack-cli": "^4.9.1"
+141. },
+142. "dependencies": {}
+143. }
+144. Build and Start the Application:
+145. npm run start
+146.
+147.
+import { useState } from 'react'
+import { Button } from "/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
+import { Input } from "/components/ui/input"
+import { Label } from "/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Play, Home, Search } from "lucide-react"
+interface AIResponse {
+ source: 'laptop' | 'phone'
+ response: string
+}
+export default function AIIntegrationApp() {
+ const [inputData, setInputData] = useState<string>('')
+ const [responses, setResponses] = useState<AIResponse[]>([]
+140. "webpack-cli": "^4.9.1"
+141. },
+142. "dependencies": {}
+143. }
+144. Build and Start the Application:
+145. npm run start
+146.
+147.
+import { useState } from 'react'
+import { Button } from "/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
+import { Input } from "/components/ui/input"
+import { Label } from "/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Play, Home, Search } from "lucide-react"
+interface AIResponse {
+ source: 'laptop' | 'phone'
+ response: string
+}
+export default function AIIntegrationApp() {
+ const [inputData, setInputData] = useState<string>('')
+ const [responses, setResponses] = useState<AIResponse[]>([]
+ const simulateLaptopAI = (data: string) => {
+ // Simulate a response from the laptop AI
+ const response = `Laptop AI response: You entered "${data}". Here's a processed response 
+from the laptop AI.`
+ setResponses(prev => [...prev, { source: 'laptop', response }])
+ }
+ const simulatePhoneAI = (data: string) => {
+ // Simulate a response from the phone AI
+ const response = `Phone AI response: You entered "${data}". Here's a processed response 
+from the phone AI.`
+ setResponses(prev => [...prev, { source: 'phone', response }])
+ }
+ const handleProcessData = () => {
+ if (inputData.trim()) {
+ simulateLaptopAI(inputData)
+ simulatePhoneAI(inputData)
+ setInputData('')
+ }
+ }
+ return (
+ <div className="flex flex-col h-screen">
+ <div className="bg-white p-4 shadow-md">
+ <h1 className="text-2xl font-bold">AI Integration App</h1>
+ </div>
+ <div className="flex flex-1 p-4">
+ <div className="w-1/2 pr-4"
+ <h2 className="text-lg font-semibold mb-4">Input Data</h2>
+ <div className="mb-4">
+ <Label htmlFor="inputData">Enter Data</Label>
+ <Textarea
+ id="inputData"
+ value={inputData}
+ onChange={(e) => setInputData(e.target.value)}
+ className="w-full h-40"
+ />
+ </div>
+ <Button onClick={handleProcessData} className="w-full">
+ <Play className="mr-2" /> Process Data
+ </Button>
+ </div>
+ <div className="w-1/2 pl-4">
+ <h2 className="text-lg font-semibold mb-4">AI Responses</h2>
+ <div className="space-y-4">
+ {responses.map((response, index) => (
+ <Card key={index} className="border p-4 rounded">
+ <CardHeader>
+ <CardTitle>{response.source === 'laptop' ? 'Laptop AI' : 'Phone AI'}</CardTitle>
+ </CardHeader>
+ <CardContent>
+ <p>{response.response}</p>
+ </CardContent>
+ </Card>
+ ))}
+ </div
+ </div>
+ </div>
+ </div>
+ )
+}
+const say = require('say');
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+// Function to make the AI talk
+function talk(text) {
+ say.speak(text, 'Alex', 1.0, (err) => {
+ if (err) {
+ return console.error(err);
+ }
+ console.log(`Said: ${text}`);
+ });
+}
+// Function to search within RAM (simulated)
+function searchInRAM(query) {
+ const ramData = [
+ "This is a sample text in RAM.",
+ "Another piece of text in RAM.",
+ "Search for this text in RAM."
+ ] const results = ramData.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+ return results;
+}
+// Function to search within the hard disk
+function searchInHardDisk(query, directory = '.') {
+ const results = [];
+ function searchFiles(dir) {
+ try {
+ const files = fs.readdirSync(dir);
+ files.forEach(file => {
+ const filePath = path.join(dir, file);
+ const fileStat = fs.statSync(filePath);
+ if (fileStat.isDirectory()) {
+ searchFiles(filePath);
+ } else {
+ try {
+ const fileContent = fs.readFileSync(filePath, 'utf-8');
+ if (fileContent.toLowerCase().includes(query.toLowerCase())) {
+ results.push(filePath);
+ }
+ } catch (err) {
+ console.error(`Error reading file ${filePath}:`, err);
+ }
+  });
+ } catch (err) {
+ console.error(`Error reading directory ${dir}:`, err);
+ }
+ }
+ searchFiles(directory);
+ return results;
+}
+// Function to search over the internet
+async function searchOverInternet(query) {
+ try {
+ const response = await 
+axios.get(`https://www.google.com/search?q=${encodeURIComponent(query)}`);
+ // For simplicity, we'll just return the status code
+ return `Search results for "${query}" fetched with status code: ${response.status}`;
+ } catch (error) {
+ return `Error fetching search results for "${query}": ${error.message}`;
+ }
+}
+// Main function to handle user input
+async function main() {
+ const readline = require('readline').createInterface({
+ input: process.stdin,
+input: process.stdin,
+ output: process.stdou
+mport { useState } from 'react';
+import { Button, Input, Label } from "/components/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card";
+export default function AiForm() {
+ const [name, setName] = useState('');
+ const [email, setEmail] = useState('');
+ const [message, setMessage] = useState('');
+ const [feedback, setFeedback] = useState('');
+ const [errors, setErrors] = useState({ name: '', email: '', message: '' });
+ const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+ e.preventDefault();
+ const newErrors = { name: '', email: '', message: '' };
+ if (!name) {
+ newErrors.name = 'Name is required';
+ }
+ if (!email) {
+ newErrors.email = 'Email is required';
+ } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+ newErrors.email = 'Invalid email address';
+ }
+ if (!message) {
+ newErrors.message = 'Message is required';
+  setErrors(newErrors);
+ if (!newErrors.name && !newErrors.email && !newErrors.message) {
+ setFeedback('Thank you for your message! Our AI will respond to you shortly.');
+ }
+ };
+ return (
+ <Card className="w-full max-w-md mx-auto mt-10">
+ <CardHeader>
+ <CardTitle className="text-2xl font-bold">AI-Powered Form</CardTitle>
+ </CardHeader>
+ <CardContent>
+ <form onSubmit={handleSubmit}>
+ <div className="mb-4">
+ <Label htmlFor="name">Name</Label>
+ <Input
+ type="text"
+ id="name"
+ value={name}
+ onChange={(e) => setName(e.target.value)}
+ className="mt-1"
+ />
+ {errors.name && <div className="text-red-500 mt-1">{errors.name}</div>}
+ </div>
+ <div className="mb-4">
+ <Label htmlFor="email">Email</Label
+ <Input
+ type="email"
+ id="email"
+ value={email}
+ onChange={(e) => setEmail(e.target.value)}
+ className="mt-1"
+ />
+ {errors.email && <div className="text-red-500 mt-1">{errors.email}</div>}
+ </div>
+ <div className="mb-4">
+ <Label htmlFor="message">Message</Label>
+ <textarea
+ id="message"
+ value={message}
+ onChange={(e) => setMessage(e.target.value)}
+ className="mt-1 block w-full rounded-md border-gray-300 shadow-sm 
+focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+ />
+ {errors.message && <div className="text-red-500 mt-1">{errors.message}</div>}
+ </div>
+ <Button type="submit" className="w-full">
+ Submit
+ </Button>
+ {feedback && <div className="text-green-500 mt-4">{feedback}</div>}
+ </form>
+ </CardContent>
+ </Card>
+ )}
+import { useState } from 'react'
+import { Button } from "/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
+import { Input } from "/components/ui/input"
+import { Label } from "/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Play, Home, Search } from "lucide-react"
+interface AIResponse {
+source: 'laptop' -- 'phone'
+response: string
+}
+export default function AIIntegrationApp() {
+const [inputData, setInputData] = useState('')
+const [responses, setResponses] = useState([])
+const simulateLaptopAI = (data: string) => {
+// Simulate a response from the laptop AI
+const response = `Laptop AI response: You entered "${data}". Here's a processed response 
+from the laptop AI.`
+ setResponses(prev => [...prev, { source: 'laptop', response }])
+}
+const simulatePhoneAI = (data: string) => {
+// Simulate a response from the phone AI
+const response = `Phone AI response: You entered "${data}". Here's a processed response 
+from the phone AI.`
+ setResponses(prev => [...prev, { source: 'phone', response }])
+}
+const handleProcessData = () => {
+ if (inputData.trim())  simulateLaptopAI(inputData)
+ simulatePhoneAI(inputData)
+ setInputData('')
+}
+}
+ return (
+AI Integration App Input Data Enter Data id="inputData" value={inputData} onChange={(e) 
+=> setInputData(e.target.value)} className="w-full h-40" /> Process Data AI Responses 
+{responses.map((response, index) => ( {response.source === 'laptop' ? 'Laptop AI' : 
+'Phone AI'} {response.response} ))}
+)
+}
+const say = require('say');
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+// Function to make the AI talk
+function talk(text) {
+say.speak(text, 'Alex', 1.0, (err) => {
+ if (err) {
+return console.error(err);
+}
+console.log(`Said: ${text}`);
+});
+}
+// Function to search within RAM (simulated)
+function searchInRAM(query) {
+const ramData = [
+"This is a sample text in RAM.""Another piece of text in RAM.",
+"Search for this text in RAM."
+];
+const results = ramData.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+return results;
+}
+// Function to search within the hard disk
+function searchInHardDisk(query, directory = '.') {
+const results = [];
+function searchFiles(dir) {
+ try {
+const files = fs.readdirSync(dir);
+files.forEach(file => {
+const filePath = path.join(dir, file);
+const fileStat = fs.statSync(filePath);
+ if (fileStat.isDirectory()) {
+ searchFiles(filePath);
+} else {
+ try {
+const fileContent = fs.readFileSync(filePath, 'utf-8');
+ if (fileContent.toLowerCase().includes(query.toLowerCase())) {
+results.push(filePath);
+}
+} catch (err) {
+console.error(`Error reading file ${filePath}:`, err);
+}
+}
+})
+} catch (err) {
+console.error(`Error reading directory ${dir}:`, err);
+}
+}
+ searchFiles(directory);
+return results;
+}
+// Function to search over the internet
+async function searchOverInternet(query) {
+ try {
+const response 
+= await axios.get(`https://www.google.com/search?q=${encodeURIComponent(query)}`);
+// For simplicity, we'll just return the status code
+return `Search results for "${query}" fetched with status code: ${response.status}`;
+} catch (error) {
+return `Error fetching search results for "${query}": ${error.message}`;
+}
+}
+// Main function to handle user input
+async function main() {
+const readline = require('readline').createInterface({
+input: process.stdin,
+input: process.stdin,
+output: process.stdout
+mport { useState } from 'react';
+import { Button, Input, Label } from "/components/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card";
+export default function AiForm() 
+const [name, setName] = useState('');
+const [email, setEmail] = useState('');
+const [message, setMessage] = useState('');
+const [feedback, setFeedback] = useState('');
+const [errors, setErrors] = useState({ name: '', email: '', message: '' });
+const handleSubmit = (e: React.FormEvent) => {
+e.preventDefault();
+const newErrors = { name: '', email: '', message: '' };
+ if (!name) {
+newErrors.name = 'Name is required';
+}
+ if (!email) {
+newErrors.email = 'Email is required';
+} else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+newErrors.email = 'Invalid email address';
+}
+ if (!message) {
+newErrors.message = 'Message is required';
+}
+ setErrors(newErrors);
+ if (!newErrors.name && !newErrors.email && !newErrors.message) {
+setFeedback('Thank you for your message! Our AI will respond to you shortly.');
+}
+};
+ return (
+AI-Powered Form
+ Name
+<input< p="" style="box-sizing: border-box;"></input<type="text"
+id="name"
+ value={name}
+ onChange={(e) => setName(e.target.value)}
+className="mt-1"
+/>
+{errors.name &&
+{errors.name}
+}
+ Email
+<input< p="" style="box-sizing: border-box;"></input<>
+type="email"
+id="email"
+ value={email}
+ onChange={(e) => setEmail(e.target.value)}
+className="mt-1"
+/>
+{errors.email &&
+{errors.email}
+}
+ Message
+<textarea< p="" style="box-sizing: border-box;"></textarea<>
+id="message"
+ value={message}
+ onChange={(e) => setMessage(e.target.value)}
+className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:borderindigo-500 focus:ring-indigo-500 sm:text-sm"
+/{errors.message &&
+{errors.message}
+}
+ Submit
+{feedback &&
+{feedback}
+}
+);
+}
+import { useState } from 'react'
+import { Button } from "/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card"
+import { Input } from "/components/ui/input"
+import { Label } from "/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Play, Home, Search } from "lucide-react"
+interface AIResponse {
+source: 'laptop' -- 'phone'
+response: string
+}
+export default function AIIntegrationApp() {
+const [inputData, setInputData] = useState('')
+const [responses, setResponses] = useState([])
+const simulateLaptopAI = (data: string) => {
+// Simulate a response from the laptop AI
+const response = `Laptop AI response: You entered "${data}". Here's a processed response 
+from the laptop AI.`
+ setResponses(prev => [...prev, { source: 'laptop', response }]
+}
+const simulatePhoneAI = (data: string) => {
+// Simulate a response from the phone AI
+const response = `Phone AI response: You entered "${data}". Here's a processed response 
+from the phone AI.`
+ setResponses(prev => [...prev, { source: 'phone', response }])
+}
+const handleProcessData = () => {
+ if (inputData.trim()) {
+ simulateLaptopAI(inputData)
+ simulatePhoneAI(inputData)
+ setInputData('')
+}
+}
+ return (
+AI Integration App Input Data Enter Data id="inputData" value={inputData} onChange={(e) 
+=> setInputData(e.target.value)} className="w-full h-40" /> Process Data AI Responses 
+{responses.map((response, index) => ( {response.source === 'laptop' ? 'Laptop AI' : 
+'Phone AI'} {response.response} ))}
+)
+}
+const say = require('say');
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+// Function to make the AI talk
+function talk(text) {
+say.speak(text, 'Alex', 1.0, (err) => {
+ if (err) return console.error(err);
+}
+console.log(`Said: ${text}`);
+});
+}
+// Function to search within RAM (simulated)
+function searchInRAM(query) {
+const ramData = [
+"This is a sample text in RAM.",
+"Another piece of text in RAM.",
+"Search for this text in RAM."
+];
+const results = ramData.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+return results;
+}
+// Function to search within the hard disk
+function searchInHardDisk(query, directory = '.') {
+const results = [];
+function searchFiles(dir) {
+ try {
+const files = fs.readdirSync(dir);
+files.forEach(file => {
+const filePath = path.join(dir, file);
+const fileStat = fs.statSync(filePath);
+ if (fileStat.isDirectory()) {
+ searchFiles(filePath);
+} else {
+ try const fileContent = fs.readFileSync(filePath, 'utf-8');
+ if (fileContent.toLowerCase().includes(query.toLowerCase())) {
+results.push(filePath);
+}
+} catch (err) {
+console.error(`Error reading file ${filePath}:`, err);
+}
+}
+});
+} catch (err) {
+console.error(`Error reading directory ${dir}:`, err);
+}
+}
+ searchFiles(directory);
+return results;
+}
+// Function to search over the internet
+async function searchOverInternet(query) {
+ try {
+const response 
+= await axios.get(`https://www.google.com/search?q=${encodeURIComponent(query)}`);
+// For simplicity, we'll just return the status code
+return `Search results for "${query}" fetched with status code: ${response.status}`;
+} catch (error) {
+return `Error fetching search results for "${query}": ${error.message}`;
+}
+}
+// Main function to handle user inpu
+async function main() {
+const readline = require('readline').createInterface({
+input: process.stdin,
+input: process.stdin,
+output: process.stdout
+mport { useState } from 'react';
+import { Button, Input, Label } from "/components/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "/components/ui/card";
+export default function AiForm() {
+const [name, setName] = useState('');
+const [email, setEmail] = useState('');
+const [message, setMessage] = useState('');
+const [feedback, setFeedback] = useState('');
+const [errors, setErrors] = useState({ name: '', email: '', message: '' });
+const handleSubmit = (e: React.FormEvent) => {
+e.preventDefault();
+const newErrors = { name: '', email: '', message: '' };
+ if (!name) {
+newErrors.name = 'Name is required';
+}
+ if (!email) {
+newErrors.email = 'Email is required';
+} else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
+newErrors.email = 'Invalid email address';
+}
+ if (!message) {
+newErrors.message = 'Message is required';
+ setErrors(newErrors);
+ if (!newErrors.name && !newErrors.email && !newErrors.message) {
+setFeedback('Thank you for your message! Our AI will respond to you shortly.');
+}
+};
+ return (
+AI-Powered Form
+ Name
+<input< p="" style="box-sizing: border-box;"></input<>
+type="text"
+id="name"
+ value={name}
+ onChange={(e) => setName(e.target.value)}
+className="mt-1"
+/>
+{errors.name &&
+{errors.name}
+}
+ Email
+<input< p="" style="box-sizing: border-box;"></input<>
+type="email"
+id="email"
+ value={email}
+ onChange={(e) => setEmail(e.target.value)}
+className="mt-1"
+/>
+{errors.email &&
+{errors.email
+}
+ Message
+<textarea< p="" style="box-sizing: border-box;"></textarea<>
+id="message"
+ value={message}
+ onChange={(e) => setMessage(e.target.value)}
+className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:borderindigo-500 focus:ring-indigo-500 sm:text-sm"
+/>
+{errors.message &&
+{errors.message}
+}
+ Submit
+{feedback &&
+{feedback}
+}
+);
+share
