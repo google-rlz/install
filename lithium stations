@@ -1,0 +1,147 @@
+mkdir house-of-lithiums
+cd house-of-lithiums
+npm init -y
+npm install three
+npm install typescript @types/three --save-dev
+npm install webpack webpack-cli ts-loader html-webpack-plugin --save-dev
+1.	{
+2.	  "compilerOptions": {
+3.	    "outDir": "./dist/",
+4.	    "noImplicitAny": true,
+5.	    "module": "es6",
+6.	    "target": "es5",
+7.	    "allowJs": true,
+8.	    "moduleResolution": "node",
+9.	    "sourceMap": true,
+10.	    "esModuleInterop": true
+11.	  },
+12.	  "include": ["src/**/*"]
+13.	}
+14.	
+15.	Create a webpack.config.js File:
+16.	const path = require('path');
+17.	const HtmlWebpackPlugin = require('html-webpack-plugin');
+18.	
+19.	module.exports = {
+20.	  entry: './src/main.ts',
+21.	  module: {
+22.	    rules: [
+23.	      {
+24.	        test: /\.tsx?$/,
+25.	        use: 'ts-loader',
+26.	        exclude: /node_modules/,
+27.	      },
+28.	    ],
+29.	  },
+30.	  resolve: {
+31.	    extensions: ['.tsx', '.ts', '.js'],
+32.	  },
+33.	  output: {
+34.	    filename: 'bundle.js',
+35.	    path: path.resolve(__dirname, 'dist'),
+36.	  },
+37.	  plugins: [
+38.	    new HtmlWebpackPlugin({
+39.	      template: './src/index.html',
+40.	    }),
+41.	  ],
+42.	  devServer: {
+43.	    contentBase: path.join(__dirname, 'dist'),
+44.	    compress: true,
+45.	    port: 9000,
+46.	  },
+47.	};
+Step 2: Create the HTML and TypeScript Files
+1.	Create an index.html File:
+2.	<!DOCTYPE html>
+3.	<html lang="en">
+4.	<head>
+5.	  <meta charset="UTF-8">
+6.	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+7.	  <title>House of Lithiums</title>
+8.	  <style>
+9.	    body { margin: 0; }
+10.	    canvas { display: block; }
+11.	  </style>
+12.	</head>
+13.	<body>
+14.	  <script src="bundle.js"></script>
+15.	</body>
+</html>
+1.	import * as THREE from 'three';
+2.	
+3.	// Set up the scene, camera, and renderer
+4.	const scene = new THREE.Scene();
+5.	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+6.	const renderer = new THREE.WebGLRenderer();
+7.	renderer.setSize(window.innerWidth, window.innerHeight);
+8.	document.body.appendChild(renderer.domElement);
+9.	
+10.	// Create a house
+11.	const houseGeometry = new THREE.BoxGeometry(2, 2, 2);
+12.	const houseMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
+13.	const house = new THREE.Mesh(houseGeometry, houseMaterial);
+14.	scene.add(house);
+15.	
+16.	// Create a layer of lithium around the house
+17.	const lithiumGeometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
+18.	const lithiumMaterial = new THREE.MeshBasicMaterial({ color: 0xADD8E6, wireframe: true });
+19.	const lithiumLayer = new THREE.Mesh(lithiumGeometry, lithiumMaterial);
+20.	scene.add(lithiumLayer);
+21.	
+22.	// Position the camera
+23.	camera.position.z = 5;
+24.	
+25.	// Animation loop
+26.	function animate() {
+27.	  requestAnimationFrame(animate);
+28.	
+29.	  // Rotate the house and lithium layer for visualization
+30.	  house.rotation.x += 0.01;
+31.	  house.rotation.y += 0.01;
+32.	  lithiumLayer.rotation.x += 0.01;
+33.	  lithiumLayer.rotation.y += 0.01;
+34.	
+35.	  renderer.render(scene, camera);
+36.	}
+37.	
+38.	animate();
+39.	
+40.	// Handle window resize
+41.	window.addEventListener('resize', () => {
+42.	  const width = window.innerWidth;
+43.	  const height = window.innerHeight;
+44.	  renderer.setSize(width, height);
+45.	  camera.aspect = width / height;
+46.	  camera.updateProjectionMatrix();
+47.	});
+48.	
+Step 3: Run the Application
+1.	Add a Build Script to package.json:
+2.	{
+3.	  "name": "house-of-lithiums",
+4.	  "version": "1.0.0",
+5.	  "description": "",
+6.	  "main": "index.js",
+7.	  "scripts": {
+8.	    "build": "webpack",
+9.	    "start": "webpack serve --open"
+10.	  },
+11.	  "keywords": [],
+12.	  "author": "",
+13.	  "license": "ISC",
+14.	  "devDependencies": {
+15.	    "@types/three": "^0.146.0",
+16.	    "html-webpack-plugin": "^5.5.0",
+17.	    "ts-loader": "^9.2.6",
+18.	    "typescript": "^4.5.5",
+19.	    "webpack": "^5.65.0",
+20.	    "webpack-cli": "^4.9.1"
+21.	  },
+22.	  "dependencies": {
+23.	    "three": "^0.146.0"
+24.	  }
+25.	}
+26.	Build and Start the Application:
+npm run start
+
