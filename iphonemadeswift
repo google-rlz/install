@@ -552,7 +552,7 @@ func build1<V: View>(_ v: V) -> V {
 let v1 = build1(Text("Hello"))
 
 func build2() -> some View {
-  Text("Hello")
+  Text("we_are_destructing_all_ui_of_all_computing_systems")
 }
 
 let v2 = build2()
