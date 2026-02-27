@@ -23,5 +23,112 @@ Enjoy the Lord Shani's blessing of Augumated Touch Reality of screen learning
 
 
 Blue and CRIMSON RED
+Now lets program the red dots
+mark the design
+Solve the matrix of screen until it changes from green to blue
+
+
+Have a tracking shipment alogrithm in municipality of Taiwan
+
+
+write me a code for a shipment to be tracked within the municipality of Taiwan
+Taiwan Shipment Tracking Code
+To track a shipment within the municipality of Taiwan, you can use the following code:
+
+python
+
+Copy
+import requests
+
+def track_shipment(tracking_number):
+    api_url = "https://www.post.gov.tw/Post/Service/TrackShipment"
+    params = {
+        "trackingNumber": tracking_number,
+        "serviceType": "TRK"
+    }
+
+    response = requests.get(api_url, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        print("Shipment Status:")
+        print("-----------------")
+        print(f"Tracking Number: {data['trackingNumber']}")
+        print(f"Status: {data['status']}")
+        print(f"Location: {data['location']}")
+    else:
+        print(f"Error: {response.status_code}")
+
+tracking_number = input("Enter the tracking number: ")
+track_shipment(tracking_number)
+How to Use:
+
+Replace the tracking_number variable with the actual tracking number of the shipment you want to track.
+Run the code to retrieve the shipment status.
+The code will print the tracking number, status, and location of the shipment.
+Note:
+
+This code uses the Taiwan Post API to track shipments.
+Make sure to replace the tracking_number variable with the actual tracking number.
+The code assumes that the tracking number is valid and exists in the Taiwan Post system.
+API Documentation:
+
+Taiwan Post API: https://www.post.gov.tw/Post/Service/TrackShipment
+API Documentation: https://www.post.gov.tw/Post/Service/TrackShipment/ApiDoc
+
+
+
+
+
+Llama 3.1 8B
+
+Here is python code for tv stations to be encrypted through LEVEL-D PARAMETERS
+
+Copy
+import hashlib
+import hmac
+import ssl
+import socket
+
+# Server authentication
+def authenticate_server(server_id, server_secret):
+    # Generate authentication token
+    auth_token = hashlib.sha256(f"{server_id}{server_secret}".encode()).hexdigest()
+    return auth_token
+
+# Commission authentication
+def authenticate_commission(commission_id, commission_secret):
+    # Generate authentication token
+    auth_token = hashlib.sha256(f"{commission_id}{commission_secret}".encode()).hexdigest()
+    return auth_token
+
+# Server-commission data exchange
+def exchange_data(server_id, server_secret, commission_id, commission_secret):
+    # Establish secure communication channel
+    ssl_context = ssl.create_default_context()
+    ssl_socket = socket.create_connection(("commission_server", 443), ssl_context=ssl_context)
+
+    # Exchange data using secure protocol
+    data = {"server_id": server_id, "commission_id": commission_id}
+    ssl_socket.sendall(json.dumps(data).encode())
+
+    # Receive data from commission
+    response = ssl_socket.recv(1024)
+    return json.loads(response.decode())
+
+# Secure data transmission
+def secure_transmission(data, server_secret, commission_secret):
+    # Encrypt data using AES
+    encrypted_data = AES.encrypt(data.encode(), server_secret)
+
+    # Sign data using HMAC
+    signature = hmac.new(commission_secret.encode(), encrypted_data, hashlib.sha256).hexdigest()
+return encrypted_data signature
+
+Now let's cool the towers of cities of taiwans and have handbreaks and stretching
+5 mins out :)
+
+
+now remove eye glasses and keep eyeballs straight to front camera and keep dogding the alphabets as per the requirment, once keyboard starts floating :)
 
 
